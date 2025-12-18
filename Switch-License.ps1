@@ -1,6 +1,35 @@
-﻿# Comprobar privilegios de Administrador
+﻿<#
+    .SYNOPSIS
+    Siemens NX License Auditor & Switcher (DX-CORE)
+    
+    .DESCRIPTION
+    Herramienta para gestionar y auditar licencias de Siemens NX localmente.
+    Permite alternar entre servidores locales y configuración Cloud, protegiendo versiones antiguas.
+
+    .AUTHOR
+    Oskar Blazquez (ATS Global Spain)
+    Contacto: Oskar.Blazquez@ats-global.com
+
+    .CHANGELOG
+    [2025-12-18] - Actualización Mayor
+      - Soporte añadido: Detección de claves 'Designcenter' (v2512+).
+      - Audit Log: Registro de cambios en archivo local 'audit.log'.
+      - Safety Check: Detección de procesos (ugraf, DesignCenter) antes de aplicar cambios.
+      - Cleanup: Eliminado soporte legacy para HKCU Common Licensing.
+      - UI: Ajuste de resolución de ventana (120x40) y tablas expandidas.
+#>
+
+# Comprobar privilegios de Administrador
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Write-Warning 'Se recomienda ejecutar como Administrador para asegurar acceso completo al registro.'
+}
+
+# --- CONFIGURACION VENTANA ---
+try {
+    $host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size (120, 60)
+    $host.UI.RawUI.WindowSize = New-Object Management.Automation.Host.Size (120, 40)
+} catch {
+    # Ignorar errores si se ejecuta en un host que no soporta redimensionar (ej. ISE o VSCode integrated)
 }
 
 # --- PALETA DE COLORES (INDUSTRIAL THEME) ---
@@ -95,11 +124,32 @@ function Set-LocalConfiguration {
     }
 }
 
+function Write-AuditLog {
+    param ([string]$Message)
+    $logFile = Join-Path $PSScriptRoot "audit.log"
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $user = [Environment]::UserName
+    $logLine = "[$timestamp] [$user] $Message"
+    Add-Content -Path $logFile -Value $logLine
+}
+
+function Test-NXProcesses {
+    $processes = Get-Process -Name "ugraf", "DesignCenter" -ErrorAction SilentlyContinue
+    if ($processes) {
+        Write-Host " [ ! ] ATENCION: SE DETECTARON APLICACIONES DE SIEMENS EJECUTANDOSE" -ForegroundColor $global:colorWarning
+        Write-Host "       Es recomendable cerrarlas antes de cambiar la licencia." -ForegroundColor $global:colorText
+        Write-Host "       (El cambio no surtira efecto hasta reiniciar la aplicacion)" -ForegroundColor $global:colorPath
+        Write-Host ""
+        return $true
+    }
+    return $false
+}
+
 # --- FUNCIONES AUXILIARES ---
 function Get-NXVersionNumber {
     param ([string]$Name)
-    # Extraer numero de "NX 2312" -> 2312
-    if ($Name -match "NX\s*(\d+)") {
+    # Extraer numero de "NX 2312" o "Designcenter 2512"
+    if ($Name -match "(?:NX|Designcenter)\s*(\d+)") {
         return [int]$matches[1]
     }
     return 0
@@ -142,7 +192,7 @@ function Get-SiemensLicenseStatus {
     
     # Mostrar config cargada
     Write-Host ' [ CONFIG  ] ' -NoNewline -ForegroundColor $global:colorInfo
-    Write-Host 'Servidor Local (Saved)  : ' -NoNewline -ForegroundColor $global:colorFrame
+    Write-Host 'Servidor Local (Guardado)  : ' -NoNewline -ForegroundColor $global:colorFrame
     Write-Host "$global:LocalServerConfig" -ForegroundColor $global:colorInfo
 
     Write-Host ''
@@ -151,8 +201,8 @@ function Get-SiemensLicenseStatus {
     Write-Host ' [ VERSIONES INSTALADAS ]' -ForegroundColor $global:colorInfo
     Write-Host ''
     
-    Write-Host '   VERSION      ARQ.    ESTADO      CONFIGURACION LICENCIA' -ForegroundColor $global:colorHeader
-    Write-Host '   ===========  ====    ======      =========================================' -ForegroundColor $global:colorBrand
+    Write-Host '   VERSION                      ARQ.      ESTADO          CONFIGURACION LICENCIA' -ForegroundColor $global:colorHeader
+    Write-Host '   ===========================  ========  ==============  =========================================' -ForegroundColor $global:colorBrand
 
     $siemensRoots = @(
         @{ Path = "HKLM:\SOFTWARE\Siemens"; Arch = "x64" },
@@ -166,7 +216,7 @@ function Get-SiemensLicenseStatus {
         $arch = $rootObj.Arch
 
         if (Test-Path $root) {
-            $nxVersions = Get-ChildItem -Path $root | Where-Object { $_.PSChildName -like "NX *" }
+            $nxVersions = Get-ChildItem -Path $root | Where-Object { $_.PSChildName -match "^(NX|Designcenter)\s*\d+" }
             
             if ($nxVersions) {
                 foreach ($versionKey in $nxVersions) {
@@ -175,10 +225,10 @@ function Get-SiemensLicenseStatus {
                     $versionName = $versionKey.PSChildName # ej "NX 2312"
                     
                     # Col 1: Version
-                    Write-Host "   > $versionName".PadRight(16) -NoNewline -ForegroundColor $global:colorVersion
+                    Write-Host "   > $versionName".PadRight(32) -NoNewline -ForegroundColor $global:colorVersion
                     
                     # Col 2: Arquitectura
-                    Write-Host "$arch".PadRight(8) -NoNewline -ForegroundColor $global:colorPath
+                    Write-Host "$arch".PadRight(10) -NoNewline -ForegroundColor $global:colorPath
                     
                     # Col 3 & 4: Estado y Valor
                     try {
@@ -191,21 +241,21 @@ function Get-SiemensLicenseStatus {
                             $isLegacy = ($vNum -gt 0 -and $vNum -le 2312)
                             
                             if ($val -match "cloud") {
-                                Write-Host '[ NUBE ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorVersion
+                                Write-Host '[ NUBE ]'.PadRight(16) -NoNewline -ForegroundColor $global:colorVersion
                             } else {
                                 if ($isLegacy) {
-                                    Write-Host '[ PROTEGIDO ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorProtected
+                                    Write-Host '[ PROTEGIDO ]'.PadRight(16) -NoNewline -ForegroundColor $global:colorProtected
                                 } else {
-                                    Write-Host '[ OK ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorSuccess
+                                    Write-Host '[ OK ]'.PadRight(16) -NoNewline -ForegroundColor $global:colorSuccess
                                 }
                             }
                             Write-Host "$val" -ForegroundColor $global:colorText
                         } else {
-                            Write-Host '[ VACIO ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorError
+                            Write-Host '[ VACIO ]'.PadRight(16) -NoNewline -ForegroundColor $global:colorError
                             Write-Host '(No definida)' -ForegroundColor $global:colorPath
                         }
                     } catch {
-                        Write-Host '[ ERROR ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorError
+                        Write-Host '[ ERROR ]'.PadRight(16) -NoNewline -ForegroundColor $global:colorError
                         Write-Host 'Acceso Denegado' -ForegroundColor $global:colorError
                     }
                 }
@@ -213,36 +263,7 @@ function Get-SiemensLicenseStatus {
         }
     }
 
-    # --- 3. COMMON LICENSING (HKCU) ---
-    $commonLicPath = "HKCU:\Software\Siemens_PLM_Software\Common_Licensing"
-    if (Test-Path $commonLicPath) {
-        $totalFound++
-        # Col 1: Version (Custom Name)
-        Write-Host "   > Common Lic.".PadRight(16) -NoNewline -ForegroundColor $global:colorVersion
-        
-        # Col 2: Arquitectura (HKCU)
-        Write-Host "HKCU".PadRight(8) -NoNewline -ForegroundColor $global:colorPath
-        
-        try {
-            $prop = Get-ItemProperty -Path $commonLicPath -Name "NX_SERVER" -ErrorAction SilentlyContinue
-            if ($prop -and $prop.NX_SERVER) {
-                $val = $prop.NX_SERVER
-                
-                if ($val -match "cloud") {
-                    Write-Host '[ NUBE ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorVersion
-                } else {
-                    Write-Host '[ OK ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorSuccess
-                }
-                Write-Host "$val" -ForegroundColor $global:colorText
-            } else {
-                Write-Host '[ VACIO ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorError
-                Write-Host '(No definida)' -ForegroundColor $global:colorPath
-            }
-        } catch {
-            Write-Host '[ ERROR ]'.PadRight(12) -NoNewline -ForegroundColor $global:colorError
-            Write-Host 'Acceso Denegado' -ForegroundColor $global:colorError
-        }
-    }
+
 
     if ($totalFound -eq 0) {
         Write-Host ''
@@ -265,6 +286,14 @@ function Invoke-SiemensLicenseSwitch {
         $targetVal = $global:LocalServerConfig
     }
 
+    # CHEQUEO DE PROCESOS (Feature 7)
+    Test-NXProcesses | Out-Null
+    
+    # LOG INICIO (Feature 5)
+    Write-AuditLog "Inicio de cambio de licencia. Modo: $Mode | Target: $targetVal"
+
+    Write-Host ""
+
     Write-Host ""
     Write-Host " [ PROCESANDO CAMBIOS... ]" -ForegroundColor $global:colorWarning
     Write-Host ""
@@ -273,8 +302,10 @@ function Invoke-SiemensLicenseSwitch {
     try {
         [Environment]::SetEnvironmentVariable("SPLM_LICENSE_SERVER", $targetVal, "Machine")
         Write-Host "   [ SISTEMA ] Variable de entorno actualizada a: $targetVal" -ForegroundColor $global:colorSuccess
+        Write-AuditLog "SUCCESS: Variable de entorno SPLM_LICENSE_SERVER actualizada."
     } catch {
         Write-Host "   [ ERROR ] No se pudo cambiar variable de entorno (¿Permisos?)" -ForegroundColor $global:colorError
+        Write-AuditLog "ERROR: Fallo al actualizar Variable de entorno. $_"
     }
 
     # 2. Registro (Filtrado)
@@ -282,7 +313,7 @@ function Invoke-SiemensLicenseSwitch {
 
     foreach ($root in $siemensRoots) {
         if (Test-Path $root) {
-            $nxVersions = Get-ChildItem -Path $root | Where-Object { $_.PSChildName -like "NX *" }
+            $nxVersions = Get-ChildItem -Path $root | Where-Object { $_.PSChildName -match "^(NX|Designcenter)\s*\d+" }
             foreach ($key in $nxVersions) {
                 $vName = $key.PSChildName
                 $vNum = Get-NXVersionNumber -Name $vName
@@ -298,23 +329,16 @@ function Invoke-SiemensLicenseSwitch {
                 try {
                     Set-ItemProperty -Path $key.PSPath -Name "LICENSESERVER" -Value $targetVal -ErrorAction Stop
                     Write-Host "   [ OK ] $vName actualizado a $targetVal" -ForegroundColor $global:colorSuccess
+                    Write-AuditLog "SUCCESS: Registro actualizado para $vName -> $targetVal"
                 } catch {
                     Write-Host "   [ ERROR ] $vName fallo al actualizar." -ForegroundColor $global:colorError
+                    Write-AuditLog "ERROR: Fallo al actualizar registro para $vName ($key.PSPath). $_"
                 }
             }
         }
     }
     
-    # 3. Common Licensing (HKCU)
-    $commonLicPath = "HKCU:\Software\Siemens_PLM_Software\Common_Licensing"
-    if (Test-Path $commonLicPath) {
-        try {
-            Set-ItemProperty -Path $commonLicPath -Name "NX_SERVER" -Value $targetVal -ErrorAction Stop
-            Write-Host "   [ OK ] Common Licensing (HKCU) actualizado a $targetVal" -ForegroundColor $global:colorSuccess
-        } catch {
-            Write-Host "   [ ERROR ] Common Licensing (HKCU) fallo al actualizar." -ForegroundColor $global:colorError
-        }
-    }
+
 
     Start-Sleep -Seconds 2
 }
