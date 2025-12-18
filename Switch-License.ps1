@@ -9,6 +9,7 @@
     .AUTHOR
     Oskar Blazquez (ATS Global Spain)
     Contacto: Oskar.Blazquez@ats-global.com
+    GitHub: https://github.com/DeXon18
 
     .CHANGELOG
     [2025-12-18] - Actualización Mayor
