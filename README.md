@@ -28,8 +28,9 @@ Esta utilidad permite visualizar y conmutar rápidamente la configuración de li
 
 ## 🛠️ Instalación y Uso
 
-1.  Descarga el repositorio o los archivos `.bat` y `.ps1`.
-2.  Mantén ambos archivos en la misma carpeta.
+1.  **Descarga la última versión** desde la sección [Releases](https://github.com/DeXon18/SIEMENS-NX-LICENSE-AUDITOR/releases/latest).
+    - _Busca el archivo `NX-License-Auditor_vX.X.zip` en la lista de "Assets"._
+2.  Descomprime el archivo y mantén todos los archivos en la misma carpeta.
 3.  **Ejecución:**
     - Haz doble clic en **`Switch-License.bat`**.
     - Si se solicita, acepta el aviso de Control de Cuentas de Usuario (UAC).
