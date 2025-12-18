@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manual de Uso - Siemens NX Auditor</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+      }
+      h1 {
+        color: #0078d7;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 10px;
+      }
+      h2 {
+        color: #005a9e;
+        margin-top: 30px;
+      }
+      h3 {
+        color: #333;
+        background-color: #e6e6e6;
+        padding: 5px 10px;
+        border-left: 5px solid #0078d7;
+      }
+      code {
+        background-color: #f1f1f1;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: "Consolas", monospace;
+        color: #d63384;
+      }
+      .note {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        padding: 10px;
+        border-radius: 5px;
+        color: #856404;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      li {
+        margin-bottom: 5px;
+      }
+      .step {
+        font-weight: bold;
+        color: #0078d7;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background: white;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #0078d7;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MANUAL DE USO: SIEMENS NX LICENSE AUDITOR</h1>
+    <p>
+      Este documento explica cómo utilizar la herramienta
+      <strong>SIEMENS NX LICENSE AUDITOR (DX-CORE)</strong> para gestionar las
+      licencias de sus productos Siemens (NX y Designcenter).
+    </p>
+
+    <h2>1. Introducción</h2>
+    <p>
+      Esta herramienta permite cambiar rápida y seguramente entre dos tipos de
+      licencias:
+    </p>
+    <ul>
+      <li>
+        <strong>Licencia Local</strong>: Servidor tradicional de la empresa (ej:
+        <code>29000@192.168.1.150</code>).
+      </li>
+      <li>
+        <strong>Licencia Cloud</strong>: Nuevas licencias basadas en la nube.
+      </li>
+    </ul>
+    <p class="note">
+      ✅ El programa <strong>protege automáticamente</strong> las versiones
+      antiguas que no soportan la nube para que no dejen de funcionar.
+    </p>
+
+    <h2>2. Primeros Pasos</h2>
+
+    <h3>Ejecución</h3>
+    <ol>
+      <li>Localice la carpeta con los archivos descargados.</li>
+      <li>
+        Haga <strong>doble clic</strong> en el archivo
+        <span class="step">Switch-License.bat</span>.
+      </li>
+      <li>
+        Windows pedirá permisos de Administrador. Haga clic en
+        <strong>Sí</strong>.
+      </li>
+    </ol>
+    <p class="note">
+      ⚠ Nota: Los permisos de administrador son obligatorios para poder cambiar
+      la configuración del sistema.
+    </p>
+
+    <h3>Configuración Inicial (Solo la primera vez)</h3>
+    <p>
+      Al abrir el programa por primera vez, le pedirá el servidor de licencias:
+    </p>
+    <ul>
+      <li>
+        Escriba la dirección (ej: <code>29000@miservidor</code>) y presione
+        <strong>ENTER</strong>.
+      </li>
+    </ul>
+
+    <h2>3. Pantalla Principal (Dashboard)</h2>
+    <p>Verá una tabla con el estado actual de sus programas:</p>
+
+    <table>
+      <tr>
+        <th>ESTADO</th>
+        <th>SIGNIFICADO</th>
+      </tr>
+      <tr>
+        <td><code>[ OK ]</code></td>
+        <td>Configurado correctamente en <strong>Local</strong>.</td>
+      </tr>
+      <tr>
+        <td><code>[ NUBE ]</code></td>
+        <td>Configurado para usar licencia <strong>Cloud</strong>.</td>
+      </tr>
+      <tr>
+        <td><code>[ PROTEGIDO ]</code></td>
+        <td>Versión antigua bloqueada en Local por seguridad.</td>
+      </tr>
+    </table>
+
+    <h2>4. Opciones Disponibles</h2>
+    <p>Use los números del teclado para elegir una opción:</p>
+
+    <h3><code>[1]</code> Cambiar a NUBE (Cloud)</h3>
+    <p>
+      Cambia todas las versiones compatibles a modo nube. <br /><em
+        >(Las versiones antiguas NO se tocarán).</em
+      >
+    </p>
+
+    <h3><code>[2]</code> Cambiar a LOCAL</h3>
+    <p>Restaura todo al servidor de licencias de la empresa.</p>
+
+    <h3><code>[3]</code> Modificar Servidor Local</h3>
+    <p>Úselo si cambia la IP del servidor de licencias.</p>
+
+    <h2>5. Seguridad y Logs</h2>
+    <h3>⚠ Advertencia de Programas Abiertos</h3>
+    <p>
+      Si intenta cambiar la licencia con <strong>NX</strong> o
+      <strong>DesignCenter</strong> abierto, el programa le avisará en color
+      <span style="color: orange; font-weight: bold">AMARILLO</span>.
+    </p>
+    <p>Cierre los programas antes de continuar para evitar errores.</p>
+
+    <h3>Historial</h3>
+    <p>
+      Se genera un archivo <code>audit.log</code> donde queda registrado quién
+      hizo el cambio y cuándo.
+    </p>
+
+    <hr />
+    <p style="text-align: center; font-size: 0.9em; color: #666">
+      Desarrollado por ATS Global Spain | Soporte Técnico
+    </p>
+  </body>
+</html>
