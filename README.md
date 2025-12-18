@@ -8,15 +8,17 @@ Esta utilidad permite visualizar y conmutar rápidamente la configuración de li
 ## 🚀 Características Principales
 
 - **Auditoría Visual (Dashboard):** Visualización clara y tabular de todas las versiones de NX instaladas, su arquitectura (x64/x86) y su estado actual de licencia.
-- **Gestión Multi-Versión:** Detecta dinámicamente versiones instaladas en `HKLM\SOFTWARE\Siemens` y `HKLM\SOFTWARE\WOW6432Node\Siemens`.
-- **Soporte Common Licensing:** Gestiona también la clave `NX_SERVER` en `HKCU\Software\Siemens_PLM_Software\Common_Licensing`.
+- **Gestión Multi-Versión:** Detecta dinámicamente versiones instaladas en `HKLM\SOFTWARE\Siemens` y `HKLM\SOFTWARE\WOW6432Node\Siemens`. Soporta tanto **NX** como **Designcenter** (v2512+).
 - **Modo Interactivo:**
   - **[1] NUBE:** Cambia las licencias modernas a "Cloud".
   - **[2] LOCAL:** Restaura las licencias al servidor local configurado.
   - **[3] CONFIGURAR:** Permite modificar el servidor local guardado.
-- **Protección Legacy:** Las versiones **NX 2312 e inferiores** están protegidas y **NO** se cambian a modo Cloud (se mantienen siempre en Local para evitar errores).
-- **Persistencia (Config.json):** Guarda tu servidor de licencias local preferido para no tener que escribirlo cada vez.
-- **Launcher Automático (`.bat`):** Se encarga de solicitar permisos de Administrador y lanzar PowerShell con las políticas de ejecución correctas.
+- **Seguridad y Auditoría:**
+  - **Chequeo de Procesos:** Detecta si NX (`ugraf`) o DesignCenter están abiertos y avisa antes de aplicar cambios.
+  - **Logs (`audit.log`):** Registra cada cambio realizado (fecha, usuario y éxito/error) en un archivo local.
+- **Protección Legacy:** Las versiones **NX 2312 e inferiores** están protegidas y **NO** se cambian a modo Cloud.
+- **Persistencia (Config.json):** Guarda tu servidor de licencias local preferido.
+- **Launcher Automático (`.bat`):** Maneja la elevación de permisos y configuración de ventana (120x40).
 
 ## 📋 Requisitos
 
@@ -32,14 +34,16 @@ Esta utilidad permite visualizar y conmutar rápidamente la configuración de li
     - Haz doble clic en **`Switch-License.bat`**.
     - Si se solicita, acepta el aviso de Control de Cuentas de Usuario (UAC).
 4.  **Primera Vez:**
-    - Si no tienes un archivo `config.json`, el script intentará detectar tu servidor local.
-    - Si no lo detecta, te pedirá que lo ingreses (ej. `28000@servidor`).
+    - El script detectará licencias instaladas (NX / Designcenter).
+    - Si no tienes configurado un servidor local, te pedirá ingresarlo (ej. `28000@servidor`).
 
 ## ⚙️ Estructura del Proyecto
 
-- **`Switch-License.bat`**: Lanzador. Gestiona la elevación a Admin y lanza el script de PowerShell.
-- **`Switch-License.ps1`**: Núcleo lógico. Contiene el dashboard, lógica de registro y menús.
-- **`config.json`**: (Generado automáticamente) Almacena la dirección del servidor local.
+- **`Switch-License.bat`**: Lanzador. Gestiona permisos, colores y lanza PowerShell.
+- **`Switch-License.ps1`**: Lógica principal. Dashboard, Registro, Safety Checks.
+- **`config.json`**: Almacena la dirección del servidor local.
+- **`audit.log`**: Historial de cambios realizados por la herramienta.
+- **`MANUAL_DE_USO.md`**: Guía detallada para el usuario final.
 
 ## 👤 Autor
 
