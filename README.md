@@ -48,5 +48,6 @@ Esta utilidad permite visualizar y conmutar rápidamente la configuración de li
 ## 👤 Autor
 
 **Oskar Blazquez**  
+_Software License Support Specialist & Automation Enthusiast_  
 ATS Global Spain  
 Contacto: `Oskar.Blazquez@ats-global.com` | `Soporte@ats-global.com`
