@@ -8,7 +8,7 @@ Este documento explica cómo utilizar la herramienta **SIEMENS NX LICENSE AUDITO
 
 Esta herramienta permite a los usuarios cambiar rápida y seguramente entre dos tipos de licencias:
 
-- **Licencia Local**: Servidor de licencias tradicional (ej: `28000@10.34.16.25`).
+- **Licencia Local**: Servidor de licencias tradicional (ej: `29000@192.168.1.150`).
 - **Licencia Cloud**: Nuevas licencias basadas en la nube.
 
 Además, protege automáticamente las versiones antiguas que no soportan la nube.
@@ -28,7 +28,7 @@ Para iniciar el programa:
 
 La primera vez que abra el programa, le pedirá que indique su **Servidor de Licencias Local**.
 
-- Escriba la dirección y puerto (ej: `28000@servidor_licencias`) y presione ENTER.
+- Escriba la dirección y puerto (ej: `29000@servidor_licencias`) y presione ENTER.
 - Esta configuración se guardará para el futuro.
 
 ---
@@ -46,7 +46,7 @@ Una vez iniciado, verá una pantalla negra con una tabla.
     - `[ NUBE ]`: Configurado para usar licencia Cloud.
     - `[ PROTEGIDO ]`: Versión antigua bloqueada en Local por seguridad.
     - `[ VACIO ]` o `[ ERROR ]`: Problemas de detección.
-4.  **CONFIGURACION LICENCIA**: El valor real que tiene el registro (ej: `28000@...` o `cloud`).
+4.  **CONFIGURACION LICENCIA**: El valor real que tiene el registro (ej: `29000@...` o `cloud`).
 
 ---
 
@@ -61,7 +61,7 @@ Use los números del teclado para seleccionar una acción:
 
 ### `[2] Cambiar a LOCAL`
 
-- Restaura todas las versiones al servidor que configuró (ej: `28000@...`).
+- Restaura todas las versiones al servidor que configuró (ej: `29000@...`).
 
 ### `[3] Modificar Servidor Local`
 

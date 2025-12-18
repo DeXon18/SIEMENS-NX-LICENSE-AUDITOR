@@ -35,7 +35,7 @@ Esta utilidad permite visualizar y conmutar rápidamente la configuración de li
     - Si se solicita, acepta el aviso de Control de Cuentas de Usuario (UAC).
 4.  **Primera Vez:**
     - El script detectará licencias instaladas (NX / Designcenter).
-    - Si no tienes configurado un servidor local, te pedirá ingresarlo (ej. `28000@servidor`).
+    - Si no tienes configurado un servidor local, te pedirá ingresarlo (ej. `29000@servidor`).
 
 ## ⚙️ Estructura del Proyecto
 

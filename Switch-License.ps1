@@ -78,12 +78,12 @@ function Initialize-SiemensConfig {
         Write-Host ""
         Write-Host " No se detecto un servidor de licencias local configurado."
         Write-Host " Por favor, introduzca el servidor de licencias LOCAL."
-        Write-Host " Ejemplos: 28000@servidor  o  28000@servidor1;29000@servidor2" -ForegroundColor $global:colorHeader
+        Write-Host " Ejemplos: 29000@servidor  o  28000@servidor1;29000@servidor2" -ForegroundColor $global:colorHeader
         Write-Host ""
         $inputVal = Read-Host " Servidor Local > "
         
         if ([string]::IsNullOrWhiteSpace($inputVal)) {
-            $detectedLocal = "28000@localhost" # Fallback por defecto si no escribe nada
+            $detectedLocal = "29000@localhost" # Fallback por defecto si no escribe nada
         } else {
             $detectedLocal = $inputVal.Trim()
         }
