@@ -1,4 +1,5 @@
 # SIEMENS NX LICENSE AUDITOR (DX-CORE)
+![Imagen descriptiva](https://i.imgur.com/HQeoMtI.png)
 
 **Herramienta de Auditoría y Gestión de Licencias para Siemens NX.**  
 Desarrollada por **ATS Global Spain**.
